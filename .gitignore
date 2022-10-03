@@ -30,6 +30,8 @@ node_modules
 server/assets/resources
 content/scratch
 content/conv-architectures/julia
+ts_build
+build
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
@@ -38,4 +40,4 @@ content/conv-architectures/julia
 
 tmp.csv
 tmp.jl
-package-lock.json
+convert.jl

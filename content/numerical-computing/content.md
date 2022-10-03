@@ -1,23 +1,27 @@
-
 # Numerical Computation
 
 > id: machine-arithmetic
+> description: Machine arithmetic, numerical error, pseudorandom numbers, automatic differentiation, and gradient descent optimization algorithms.
+> color: "#31bf74"
+> next: intro-statistics
+> author: Samuel S. Watson
+
 ## Machine Arithmetic
 
-Computers store all information, including numerical values, as sequences of [[bits|cookies|chips]]. The **type** of a numeric value specifies how the underlying sequence of bits should be interpreted as a number. 
+Computers store all information, including numerical values, as sequences of [[bits|cookies|chips]]. The **type** of a numeric value specifies how the underlying sequence of bits should be interpreted as a number.
 
 ---
 > id: step-1bitstring
 
-You can access the bit representation of a numerical value in Julia using the function `{jl} bitstring`. For example, we can inspect how boolean values are represented in Julia: 
+You can access the bit representation of a numerical value in Julia using the function `{jl} bitstring`. For example, we can inspect how boolean values are represented in Julia:
 
     pre(julia-executable)
       | println(bitstring(true))
       | println(bitstring(false))
-      
-You might think that boolean values would be stored using a single bit. However, as you can see from the output above, in fact they use [eight bits](gloss:bit8). 
 
-In this section, we will introduce several of the most important numeric types. 
+You might think that boolean values would be stored using a single bit. However, as you can see from the output above, in fact they use [eight bits](gloss:bit8).
+
+In this section, we will introduce several of the most important numeric types.
 
 [Continue](btn:next)
 
@@ -38,7 +42,7 @@ Find the binary representations of each of the following numbers: 2, 16, 20, and
 ---
 > id: solution-1
 
-*Solution*. The binary representation of 2 is $10$, of 16 is $10000$, of is $1010$, and of 100 is $1100100$.
+*Solution.* The binary representation of 2 is $10$, of 16 is $10000$, of 20 is $10100$, and of 100 is $1100100$.
 
 [Continue](btn:next)
 
@@ -47,12 +51,12 @@ Find the binary representations of each of the following numbers: 2, 16, 20, and
 
 ### 64-bit Integers
 
-The most common numeric types used in modern computers use [64 bits](gloss:bit64) to represent each number. There are [[$2^{64}$|$64!$|$64^2$]] length-64 strings of 0's and/or 1's. 
+The most common numeric types used in modern computers use [64 bits](gloss:bit64) to represent each number. There are [[$2^{64}$|$64!$|$64^2$]] length-64 strings of 0's and/or 1's.
 
 ---
 > id: step-3
 
-Therefore, with 64 bits we can represent $2^{64}$ numbers. For example, we could represent the integers from 0 to $2^{64}-1$ by interpreting each string of 0's and 1's as a binary number. This type exists (in Julia it's called `{jl} UInt64`, for *unsigned 64-bit integer*), but most of the time it's important to be able to represent negative integers as well. 
+Therefore, with 64 bits we can represent $2^{64}$ numbers. For example, we could represent the integers from 0 to $2^{64}-1$ by interpreting each string of 0's and 1's as a binary number. This type exists (in Julia it's called `{jl} UInt64`, for *unsigned 64-bit integer*), but most of the time it's important to be able to represent negative integers as well.
 
 [Continue](btn:next)
 
@@ -103,7 +107,7 @@ Show that if $1 \leq n \leq 2^{63}-1$, then you can find `{jl} bitstring(-n)` fr
 ---
 > id: solution-2
 
-*Solution*. Recall that for $1 \leq n \leq 2^{63},$ $-n$ is represented by the binary representation of $2^{64} - n.$ Representing $2^{64} - n$ in binary is not straightforward but $2^{64} - 1 - n$ is easier because $2^{64} - 1$ in binary is just $64$ ones. This means that for any $1 \leq n \leq 2^{63} - 1,$ we can get $2^{64} - 1 - n$ in binary by changing a $1$ to a $0$ in the binary representation of $2^{64} - 1$ at every position where $n$ in binary has a $1$. In other words, to get $2^{64} - 1 - n$ in binary, we just flip the binary representation of $n.$ Since
+*Solution.* Recall that for $1 \leq n \leq 2^{63},$ $-n$ is represented by the binary representation of $2^{64} - n.$ Representing $2^{64} - n$ in binary is not straightforward but $2^{64} - 1 - n$ is easier because $2^{64} - 1$ in binary is just $64$ ones. This means that for any $1 \leq n \leq 2^{63} - 1,$ we can get $2^{64} - 1 - n$ in binary by changing a $1$ to a $0$ in the binary representation of $2^{64} - 1$ at every position where $n$ in binary has a $1$. In other words, to get $2^{64} - 1 - n$ in binary, we just flip the binary representation of $n.$ Since
 
 ``` latex
 
@@ -130,16 +134,16 @@ Let's visualize our number system by placing a tick mark on the number line for 
       img(src="images/fixed-point.svg")
       p.caption.md We can represent non-integer values by interpreting each integer $n$ as $n\epsilon$.
 
-These are called **fixed point** numbers, and they have some uses (for example, in financial applications where all monetary values can safely be assumed to be a multiple of one cent). 
+These are called **fixed point** numbers, and they have some uses (for example, in financial applications where all monetary values can safely be assumed to be a multiple of one cent).
 
 [Continue](btn:next)
 
 ---
 > id: step-floating-point-motivation
 
-The problem with fixed point numbers for most scientific computing applications is that when we get very small numbers (for example, when taking the reciprocal of very large numbers), they have to be rounded off a lot relative to the size of the number. For example, if $\epsilon = 0.001$, then the reciprocal of 1999 would have to be rounded from approximately $0.0005$ to $0.001$. If that value is then multiplied by, say, 8000, then the round-off would result in a product of 8 instead of approximately 4. 
+The problem with fixed point numbers for most scientific computing applications is that when we get very small numbers (for example, when taking the reciprocal of very large numbers), they have to be rounded off a lot relative to the size of the number. For example, if $\epsilon = 0.001$, then the reciprocal of 1999 would have to be rounded from approximately $0.0005$ to $0.001$. If that value is then multiplied by, say, 8000, then the round-off would result in a product of 8 instead of approximately 4.
 
-We could address that problem by making $\epsilon$ smaller, but we encounter a tradeoff between representing small numbers accurately and being able to represent large numbers at all. Furthermore, if $\epsilon$ is very small, then large numbers are being represented with unnecessarily high precision (relative to the size of the number). The way out of this tradeoff is to relax the fixed-width increment and using a variable-sized gap between representable numbers. Such number systems are called **floating point** systems. 
+We could address that problem by making $\epsilon$ smaller, but we encounter a tradeoff between representing small numbers accurately and being able to represent large numbers at all. Furthermore, if $\epsilon$ is very small, then large numbers are being represented with unnecessarily high precision (relative to the size of the number). The way out of this tradeoff is to relax the fixed-width increment and using a variable-sized gap between representable numbers. Such number systems are called **floating point** systems.
 
 [Continue](btn:next)
 
@@ -158,13 +162,37 @@ We can see on the left edge of the (top) picture that we didn't cover zero! Ther
 ---
 > id: step-float64-system
 
-If we have 64 bits, we can do the same thing but on a grander scale. We define $\sigma$ to be the first bit of the string, $e$ to be the next 11 bits interpreted as a binary integer, and $f$ to be the remaining 52 bits interpreted as a binary integer. If $0 &lt; e &lt; 2047$, then the string represents the number
+If we have 64 bits, we can do the same thing but on a grander scale. Rather than subdividing the interval $[1,2)$ into $2^3 = 8$ equal-length intervals, we use $2^{52} = 4503599627370496$ intervals. Rather than scaling than interval up and down just a few times in each direction, we scale up 1023 times—covering every binary interval up to $[2^{1023}, 2^{1024})$—and down 1022 times—covering every binary interval down to $[2^{-1022}, 2^{-1021})$. Finally, the subnormal numbers will be equally spaced between 0 and $2^{-1022}$.
+
+We can accomplish all of this if we dedicate 11 bits to indicating the index $e$ of the binary interval we're in—starting from $e=0$ for numbers in the subnormal range and going up to $e=2046 = 2^{11}-2$ for the last interval $[2^{1023}, 2^{1024})$—and 52 bits for indicating the index $f$ of the tick within that interval. For example, the number $4 + 18\cdot 2^{-50}$ would correspond to [[$e = 1024$|$e = 1023$|$e = 2$]] and [[$f = 18$|$f = 0$|$f = 1$]].
+
+---
+> id: step-shown-as-tick-marks
+
+The nonnegative representable numbers are laid out as shown (figure not drawn to scale!):
+
+    figure
+      img(src="images/float64.svg")
+      p.caption.md The tick marks indicate the positive values which are representable as 64-bit floating point numbers. There are $2^{52}$ of them between any two successive powers of 2 from $2^{-1022}$ up to $2^{1024}$, and the interval from 0 to $2^{-1022}$ also contains $2^{52}$ representable values (these are the subnormal numbers, indicated in blue).
+
+
+[Continue](btn:next)
+
+---
+> id: step-sigma-bit
+
+That leaves us with one bit, which we call $\sigma$, to indicate the sign of the value we're representing. Also, note that we're leaving out one possible $e$ value (the last one, $e = 2047$); more on that later.
+
+---
+> id: step-formula-float64
+
+We can use this description to write down formulas for the real number values represented by each string of 64 bits. We define $\sigma$ to be the first bit of the string, $e$ to be the next 11 bits interpreted as a binary integer, and $f$ to be the remaining 52 bits interpreted as a binary integer. If $0 &lt; e &lt; 2047$, then the string represents the number
 
 ``` latex
 (-1)^\sigma\left(1+\left(\frac{1}{2}\right)^{52}f\right)\cdot2^{e-1023}.
 ```
 
-Note that the exponent $e -1023$ ranges from $-1022$ up to $1023$ as $e$ ranges from 1 to $2046$. If $e = 0$, then the string represents
+Note that the exponent $e-1023$ ranges from $-1022$ up to $1023$ as $e$ ranges from 1 to $2046$. If $e = 0$, then the string represents
 
 ``` latex
 
@@ -178,7 +206,7 @@ These are the [[subnormal numbers|integers|irrational numbers]].
 ---
 > id: step-float-graph
 
-Another way to visualize the floating point number system is to graph the floating point value associated with each binary string against its value as an unsigned integer. Here's an example for an 8-bit floating point scheme, with one sign bit, three bits for the exponent, and four bits for the mantissa. Subnormal numbers are shown in red, and powers of 2 are shown in gold. 
+Another way to visualize the floating point number system is to graph the floating point value associated with each binary string against its value as an unsigned integer. Here's an example for an 8-bit floating point scheme, with one sign bit, three bits for the exponent, and four bits for the mantissa. Subnormal numbers are shown in red, and powers of 2 are shown in gold.
 
     center: #plotly-float64-graph(width='400px')
 
@@ -187,7 +215,7 @@ Another way to visualize the floating point number system is to graph the floati
 ---
 > id: step-nan-and-inf
 
-We also appropriate the *last* value of $e$ for a special meaning: if $e = 2047$, then the string represents one of the special values `{jl} Inf` or `{jl} NaN`, depending on the value of $f$.
+We appropriate the *last* value of $e$ for a special meaning: if $e = 2047$, then the string represents one of the special values `{jl} Inf` or `{jl} NaN`, depending on the value of $f$.
 
 ::: .example
 **Example**  
@@ -207,17 +235,7 @@ Thus $-0.75$ can be represented exactly as a `{jl} Float64`.
 
 [Continue](btn:next)
 
----
-> id: step-shown-as-tick-marks
 
-The nonnegative representable numbers are laid out as shown (figure not drawn to scale!):
-
-    figure
-      img(src="images/float64.svg")
-      p.caption.md The tick marks indicate the positive values which are representable as 64-bit floating point numbers. There are $2^{52}$ of them between any two successive powers of 2 from $2^{-1022}$ up to $2^{1024}$, and the interval from 0 to $2^{-1022}$ also contains $2^{52}$ representable values (these are the subnormal numbers, indicated in blue).
-
-
-[Continue](btn:next)
 
 ---
 > id: exercise-3
@@ -232,7 +250,7 @@ Show that $0.1$ cannot be represented exactly as a `{jl} Float64`.
 ---
 > id: solution-3
 
-*Solution*. By construction, every representable Float64 is a rational number whose denominator is a power of 2. Therefore, when a representable Float64 is written as a fraction and simplified, its denominator is a power of 2. Since $\frac{1}{10}$ does not fit this description, it is not representable as a `{jl} Float64`.
+*Solution.* By construction, every representable Float64 is a rational number whose denominator is a power of 2. Therefore, when a representable Float64 is written as a fraction and simplified, its denominator is a power of 2. Since $\frac{1}{10}$ does not fit this description, it is not representable as a `{jl} Float64`.
 
 [Continue](btn:next)
 
@@ -241,15 +259,18 @@ Show that $0.1$ cannot be represented exactly as a `{jl} Float64`.
 
 ::: .exercise
 **Exercise**  
-Show that there are $2^{52}$ representable numbers in each interval of the form $[2^{k},2^{k+1})$, where $-1022 \leq k &lt; 1024$.
+The Julia function `{jl} nextfloat` returns the smallest representable value which is larger than its argument. What value will be returned by the code below?
 :::
+
+    pre(julia-executable)
+      | log2(nextfloat(11.0) - 11.0)
 
     x-quill
 
 ---
 > id: solution-4
 
-*Solution*. For $0 &lt; e &lt; 2047,$ let $k = e - 1023.$ Then $-1022 \leq k &lt; 1024.$ Notice that $2^k \leq (1 + f)\cdot 2^{k} &lt; 2^{k+1}$ if and only if $0 \leq f &lt; 1.$ Since $f$ in the Float64 system attains its maximun when all the $52$ bits are $1$'s, we can use geometric sums to show that $0 \leq f \leq 1 - 2^{-52} &lt; 1.$ Therefore if $e$ is fixed, each value of $f$ uniquely identifies a number $(1+ f)\cdot 2^{e - 1023}$ in the interval $\left[2^k, 2^{k+1}\right).$ Since there are $2^{52}$ possible values of $f,$ there are $2^{52}$ representable numbers in each interval.
+*Solution.* The difference between 11 and the next Float64 is $2^{-52 + 3} = 2^{-49}$, since 11 is in the binary interval $[2^{3}, 2^4)$, which is 3 binary intervals to the right of $[1,2]$. So the value returned will be $-49$.
 
 [Continue](btn:next)
 
@@ -265,7 +286,7 @@ Each 32-bit string represents the value
   (-1)^\sigma\left(1+\left(\frac{1}{2}\right)^{23}f\right)\cdot2^{e-127},
 
 ```
- where $\sigma$ is the first bit of the string, $e$ is the next 8 bits interpreted as a binary integer, and $f$ is the remaining 23 bits are interpreted as a binary integer. In other words, there are [[`2^23`|`2^22`|`2^21`]] equally spaced values represented between 1 and 2, and the same number of values in the interval $[2,4)$, and so on, as well as $[1/2,1)$, $[1/4,1/2)$, and so on. 
+ where $\sigma$ is the first bit of the string, $e$ is the next 8 bits interpreted as a binary integer, and $f$ is the remaining 23 bits are interpreted as a binary integer. In other words, there are [[`2^23`|`2^22`|`2^21`]] equally spaced values represented between 1 and 2, and the same number of values in the interval $[2,4)$, and so on, as well as $[1/2,1)$, $[1/4,1/2)$, and so on.
 
 ::: .example
 **Example**  
@@ -287,7 +308,7 @@ Find the positive difference between 1 and the first number greater than 1 which
 ---
 > id: solution-5
 
-*Solution*. We can represent 1 by choosing $f = 0$ and $e = 127$. To represent the largest possible number less than 1, we let the 23-bit string representing $f$ be 22 zeros followed by a 1. So the answer is $2^{-23}$.
+*Solution.* We can represent 1 by choosing $f = 0$ and $e = 127$. To represent the largest possible number less than 1, we let the 23-bit string representing $f$ be 22 zeros followed by a 1. So the answer is $2^{-23}$.
 
 We can check this in Julia using `{jl} nextfloat(Float32(1.0)) - 1`, and indeed it returns a value which is equal to $2^{-23}$: `{jl} Float32(2)^(-23) == nextfloat(Float32(1.0)) - 1` returns `{jl} true`.
 
@@ -298,7 +319,7 @@ We can check this in Julia using `{jl} nextfloat(Float32(1.0)) - 1`, and indeed 
 
 ### Arbitrary-Precision Numbers
 
-Sometimes you might want store a number without being constrained to 64 bits, or even 128 or 256 bits. It is possible to define a type which uses an *extensible* number of bits (depending on the size of the integer or precision of the real number being stored). These types are called **bignums**, and in Julia they're called `{jl} BigInt` and `{jl} BigFloat`. 
+Sometimes you might want store a number without being constrained to 64 bits, or even 128 or 256 bits. It is possible to define a type which uses an *extensible* number of bits (depending on the size of the integer or precision of the real number being stored). These types are called **bignums**, and in Julia they're called `{jl} BigInt` and `{jl} BigFloat`.
 
 [Continue](btn:next)
 
@@ -313,14 +334,14 @@ Sometimes you might want store a number without being constrained to 64 bits, or
 :::
 
     pre(julia-executable)
-      | 
+      |
 
     x-quill
 
 ---
 > id: solution-6
 
-*Solution*.  `{jl} big(1.1)` returns a number which is $8.8817841970012523233890533447265624 \times 10^{-17}$ more than 1.1.
+*Solution.*  `{jl} big(1.1)` returns a number which is $8.8817841970012523233890533447265624 \times 10^{-17}$ more than 1.1.
 
  `{jl} length(string(big(2)^100000))` returns $30{,}103$, so that's how many digits $2^{100,000}$ has.
 
@@ -343,7 +364,7 @@ To obtain numerical values of other types in Julia, use `{jl} parse` or `{jl} bi
 
 ::: .exercise
 **Exercise**
-Run the cell below to figure out about how many times slower BigInt addition is relative to Int64 addition. 
+Run the cell below to figure out about how many times slower BigInt addition is relative to Int64 addition.
 :::
 
     pre(julia-executable)
@@ -358,7 +379,7 @@ Run the cell below to figure out about how many times slower BigInt addition is 
 ---
 > id: solution-7
 
-*Solution*. Outcomes can vary quite a bit, but you should find that the bignum operation typically takes 10-20 times as long.
+*Solution.* Outcomes can vary quite a bit, but you should find that the bignum operation typically takes 10-20 times as long.
 
 
 [Continue](btn:next)
@@ -386,7 +407,7 @@ Without using a computer, perform the operations in the expression $(1.0 + 0.4/2
 ---
 > id: solution-8
 
-*Solution*. The first expression evaluates to 1.0, since adding $0.4/2^{52}$ only gets you 40% of the way to the next representable value. The second expression evaluates to $1 + 2^{-52}$. And indeed, `{jl} (1.0 + 0.4/2^52) + 0.4/2^52 == 1.0 + (0.4/2^52 + 0.4/2^52)` returns `{jl} false`.
+*Solution.* The first expression evaluates to 1.0, since adding $0.4/2^{52}$ only gets you 40% of the way to the next representable value. The second expression evaluates to $1 + 2^{-52}$. And indeed, `{jl} (1.0 + 0.4/2^52) + 0.4/2^52 == 1.0 + (0.4/2^52 + 0.4/2^52)` returns `{jl} false`.
 
 [Continue](btn:next)
 
@@ -427,7 +448,7 @@ Explain why it is never necessary to use a `{jl} BigInt` for a loop counter (tha
 ---
 > id: solution-9
 
-*Solution*. An `{jl} Int64` can store values as large as $2^{63}-1$. Assuming optimistically that the body of the loop can execute in a nanosecond, the loop could run for nearly 300 years before exhausting the positive `{jl} Int64` values. Therefore, we do not need `{jl} BigInt` values for a loop counter.
+*Solution.* An `{jl} Int64` can store values as large as $2^{63}-1$. Assuming optimistically that the body of the loop can execute in a nanosecond, the loop could run for nearly 300 years before exhausting the positive `{jl} Int64` values. Therefore, we do not need `{jl} BigInt` values for a loop counter.
 
 
 ---
@@ -479,7 +500,7 @@ There are a few categories of numerical error.
 
 ::: .example
 **Example**  
-`{jl} 0.2 + 0.1`is equal to $3.000000000000000444089209850062616169452667236328125\overline{0}$ in `{jl} Float64` arithmetic. The discrepancy between 3 and this value is roundoff error.
+`{jl} 0.2 + 0.1`is equal to $0.300000000000000444089209850062616169452667236328125\overline{0}$ in `{jl} Float64` arithmetic. The discrepancy between 0.3 and this value is roundoff error.
 :::
 
 [Continue](btn:next)
@@ -550,7 +571,7 @@ Discuss the error in each of the following scenarios using the terms *roundoff e
 ---
 > id: solution-10
 
-*Solution*.  
+*Solution.*  
 * The more trapezoids we use, the more accurate our answer will be. The difference between the exact answer and the value we get when we stop at 1000 trapezoids is truncation error.
 * The real problem here is roundoff error. `{jl} 5 + 0.5^100` gets rounded off to 5.0, so the numerator will always evaluate to 0. However, even if we used a `{jl} BigFloat` version of each of these values, there would still be truncation error in this approximation, since the expression we used was obtained by cutting off the limit in the definition of the derivative at a small but positive increment size.
 * This is an example of statistical error, since the output of the algorithm depends on the randomness we use to select the points.
@@ -601,7 +622,7 @@ Show that the condition number of $a\mapsto a^n$ is constant, for any $n \in \ma
 ---
 > id: example-solution-1
 
-*Solution*. We have
+*Solution.* We have
 
 ``` latex
 \kappa(a) = \frac{a na^{n-1}}{a^n} = n,
@@ -623,7 +644,7 @@ Show that the condition number of the function $a\mapsto a - 1$ is very large fo
 ---
 > id: example-solution-2
 
-*Solution*. We substitute into the formula for condition number and get
+*Solution.* We substitute into the formula for condition number and get
 
 ``` latex
 \kappa(a) = \frac{a}{|a-1|}
@@ -671,7 +692,7 @@ Consider a function $S: \mathbb{R} \to \mathbb{R}$. If the input changes from $a
 ---
 > id: solution-11
 
-*Solution*. The relative change in output is
+*Solution.* The relative change in output is
 
 ``` latex
 \frac{\frac{d}{da}S(a) \Delta a}{S(a)},
@@ -691,14 +712,15 @@ and the relative change in input is $\Delta a / a$. Dividing these two quantitie
 More generally, if the initial data is in $\mathbb{R}^n$ and the solution is in $\mathbb{R}^m$, then the condition number is defined to be
 
 ``` latex
-\kappa(\mathbf{a}) = \frac{|\mathbf{a}|\|J(\mathbf{a})\|}{|\mathbf{S}(\mathbf{a})|},
+\kappa(\mathbf{a}) = \frac{|\mathbf{a}|\|\frac{\partial S}{\partial \mathbf{a}}(\mathbf{a})\|}{|\mathbf{S}(\mathbf{a})|},
 ```
-where $J(\mathbf{a})$ is the Jacobian matrix of $\mathbf{S}$ and $\|J(\mathbf{a})\|$ is its operator norm. The operator norm of the Jacobian is the appropriate generalization of the norm of the derivative of $\mathbf{S}$ since it measures how $\mathbf{S}$ stretches space near $\mathbf{a}$. 
+where $\| \cdot \|$ denotes the [operator norm](gloss:operatornorm). The operator norm of the derivative is the appropriate generalization of the norm of the derivative of $\mathbf{S}$ since it measures the maximum stretching factor of $\mathbf{S}$ near $\mathbf{a}$.
 
 [Continue](btn:next)
 
 ---
 > id: step-condition-number-large
+#### Well conditioned and ill-conditioned problems
 
 If the condition number of a problem is very large, then small errors in the problem data lead to large changes in the result. A problem with large condition number is said to be **ill-conditioned**. Unless the initial data can be specified with correspondingly high precision, it will not be possible to solve the problem meaningfully.
 
@@ -720,7 +742,7 @@ x \\ y
 \end{bmatrix}
 ```
 
-Find the values of $a$ for which this matrix is ill-conditioned.
+Find the values of $a$ for which solving this equation for $[x,y]$ is ill-conditioned.
 :::
 
 [Continue](btn:next)
@@ -728,7 +750,7 @@ Find the values of $a$ for which this matrix is ill-conditioned.
 ---
 > id: example-solution-3
 
-*Solution*. If $a \neq 2$, then the solution of this equation is
+*Solution.* If $a \neq 2$, then the solution of this equation is
 
 ``` latex
  \renewcommand{\arraystretch}{1.5}
@@ -741,7 +763,7 @@ Find the values of $a$ for which this matrix is ill-conditioned.
         \frac{5 a - 24}{9 \left(a - 2\right)}
       \end{bmatrix}
 ```
-Using the formula for $\kappa$ above, we can work out that
+Using the formula for $\kappa$ above, we can work out (after several steps) that
 
 ``` latex
 \kappa(a) = \frac{7|a|\sqrt{13}}{|a-2|\sqrt{(5a-24)^2+441}}.
@@ -758,12 +780,12 @@ If $a$ is very close to $2$, then $\kappa(a)$ is very large, and the matrix is i
 [Continue](btn:next)
 
 ---
-> id: machine epsilon
+> id: machine-epsilon
 #### Machine epsilon
 
-**Machine epsilon**, denoted $\epsilon\_{\text{mach}}$, is the maximum relative error associated with rounding a real number to the nearest value representable as a given floating point type. For `{jl} Float64`, this value is $\epsilon\_{\text{mach}} = 2^{-53} \approx 1.11 \times 10^{-16}$. 
+**Machine epsilon**, denoted $\epsilon\_{\text{mach}}$, is the maximum relative error associated with rounding a real number to the nearest value representable as a given floating point type. For `{jl} Float64`, this value is $\epsilon\_{\text{mach}} = 2^{-53} \approx 1.11 \times 10^{-16}$.
 
-A competing convention—more widely used outside academia—defines $\epsilon\_{\text{mach}}$ to be the difference between 1 and the next representable number, which for `{jl} Float64`is $2^{-52}$. This is the value returned by `{jl} eps()` in Julia. Since we typically introduce a relative error on the order of $\epsilon\_{\text{mach}}$ to encode the initial data of a problem, the relative error of the computed solution should be expected to be no smaller than $\kappa \epsilon\_{\text{mach}}$, regardless of the algorithm used. 
+A competing convention—more widely used outside academia—defines $\epsilon\_{\text{mach}}$ to be the difference between 1 and the next representable number, which for `{jl} Float64`is $2^{-52}$. This is the value returned by `{jl} eps()` in Julia. Since we typically introduce a relative error on the order of $\epsilon\_{\text{mach}}$ to encode the initial data of a problem, the relative error of the computed solution should be expected to be no smaller than $\kappa \epsilon\_{\text{mach}}$, regardless of the algorithm used.
 
 [Continue](btn:next)
 
@@ -775,7 +797,7 @@ An algorithm used to solve a problem is **stable** if it is approximately as acc
 
 ::: .example
 **Example**  
-Consider the problem of evaluating $f(x) = \sqrt{1+x} - 1$ near for values of $x$ near 0. Show that the problem is well-conditioned, but algorithm of evaluating the expression $\sqrt{1+x} - 1$ following the order of operations is unstable. 
+Consider the problem of evaluating $f(x) = \sqrt{1+x} - 1$ near for values of $x$ near 0. Show that the problem is well-conditioned, but algorithm of evaluating the expression $\sqrt{1+x} - 1$ following the order of operations is unstable.
 
 Comment on whether there are stable algorithms for evaluating $f(x)$ near $x = 0$.
 :::
@@ -785,7 +807,7 @@ Comment on whether there are stable algorithms for evaluating $f(x)$ near $x = 0
 ---
 > id: example-solution-4
 
-*Solution*. Substituting this function into the condition number formula, we find that
+*Solution.* Substituting this function into the condition number formula, we find that
 
 ``` latex
 \kappa(x) = \frac{\sqrt{1+x}+1}{2\sqrt{1+x}}.
@@ -836,9 +858,37 @@ Interpret your results by explaining how to choose two vectors with small relati
 ---
 > id: solution-12
 
-*Solution*. The Jacobian of the transformation $\mathbf{x} \mapsto A \mathbf{x}$ is the matrix $A$ itself, and the operator norm of $A$ is equal to its largest singular value. Therefore, to maximize $\kappa$, we minimize the ratio $|S(\mathbf{a})|/|\mathbf{a}|$. This ratio is minimized when $\mathbf{a}$ is the right singular vector with the least singular value. Therefore, the maximum possible value of $\kappa$ is the ratio of the largest singular value of $A$ to the smallest singular value of $A$.
+*Solution.* The derivative of the transformation $\mathbf{x} \mapsto A \mathbf{x}$ is the matrix $A$ itself, and the operator norm of $A$ is equal to its largest singular value. Therefore, to maximize $\kappa$, we minimize the ratio $|S(\mathbf{a})|/|\mathbf{a}|$. This ratio is minimized when $\mathbf{a}$ is the right singular vector with the least singular value. Therefore, the maximum possible value of $\kappa$ is the ratio of the largest singular value of $A$ to the smallest singular value of $A$.
 
 [Continue](btn:next)
+
+::: .exercise
+**Exercise**  
+Find the condition number of the function $\mathbf{x}\mapsto A\mathbf{x}$, where `{jl} A = [1 2; 3 4]` and show that there is a vector $\mathbf{v}$ and an error $\mathbf{e}$ for which the relative error is indeed magnified by approximately the condition number of $A$.
+:::
+
+    pre(julia-executable)
+      | using LinearAlgebra
+      | A = [1 2; 3 4]
+    x-quill
+
+---
+> id: step-condition-matrix-solution
+
+*Solution.* We choose `{jl} v` and `{jl} e` to be the columns of $V$ in the singular value decomposition of `{jl} A`:
+
+    pre(julia-executable)
+      | using LinearAlgebra
+      | A = [1 2; 3 4]
+      | U, S, V = svd(A)
+      | σmax, σmin = S
+      | κ = σmax/σmin
+      | v = V[:,2]
+      | e = V[:,1]
+      | rel_error_output = norm(A*(v+e) - A*v)/norm(A*v)
+      | rel_error_input = norm(v + e - v) / norm(v)
+      | rel_error_output / rel_error_input, κ
+
 
 ---
 > id: step-hazards
@@ -885,7 +935,7 @@ Use your knowledge of floating point arithmetic to explain why computing $\sqrt{
 ---
 > id: solution-13
 
-*Solution*. The gaps between successive representable positive values get wider as we move on the right on the number line. Therefore, the error of the first calculation is the roundoff error associated with calculating `{jl} sqrt(10^6+1)`, which is roughly $10^3 \epsilon\_{\mathrm{mach}}$.
+*Solution.* The gaps between successive representable positive values get wider as we move on the right on the number line. Therefore, the error of the first calculation is the roundoff error associated with calculating `{jl} sqrt(10^6+1)`, which is roughly $10^3 \epsilon\_{\mathrm{mach}}$.
 
 The relative error in `{jl} 1/(sqrt(10^6 + 1) + sqrt(10^6))`, meanwhile, is approximately the same as the relative error in the calculation of `{jl} sqrt(10^6 + 1) + sqrt(10^6)` (since the condition number of the reciprocal function is approximately 1). This relative error is only about $\epsilon\_{\mathrm{mach}}$.
 
@@ -921,8 +971,8 @@ Guess what value the following code block returns. Run it and see what happens. 
 :::
 
     pre(julia-executable)
-      | function increment_till(t,step=0.1)
-      |   x = 0.0
+      | function increment_till(t, step=0.1)
+      |   x = 0.5
       |     while x < t
       |       x += step
       |     end
@@ -935,13 +985,18 @@ Guess what value the following code block returns. Run it and see what happens. 
 ---
 > id: solution-14
 
-*Solution*. It's reasonable to guess that the returned value will be 1.0. However, it's actually approximately 1.1. The reason is that adding the Float64 representation of 0.1 to 0.0 ten times results in a number slightly smaller than 1.0.
+*Solution.* It's reasonable to guess that the returned value will be 1.0. However, it's actually approximately 1.1. The reason is that adding the Float64 representation of 0.1 ten times starting from 0.0 results in a number slightly *smaller* than 1.0. It turns out that 0.6 (the real number) is 20% of the way from the Float64 tick before it to the Float64 tick after it:
+
+    pre(julia-executable)
+      | (1//10 - floor(2^53 * 1//10) // 2^53) * 2^53
+
+This means that the Float64 sum is $\frac{1}{5}2^{-53}$ less than the mathematical sum after adding 0.1 once, then $\frac{2}{5}2^{-53}$ less after adding 0.1 again, and so on. By the time we we get to $1$, we've lost a full tick spacing so after 5 iterations, $x$ is equal to $1-2^{-53}$.
 
 We could use 1/8 = 0.125 instead of 0.1 to get the expected behavior, since small inverse powers of 2 and their sums with small integers can be represented exactly as 64-bit floating points numbers.
 
 ---
 
-> id: pseudorandom number generation
+> id: pseudorandom-number-generation
 ## Pseudorandom Number Generation
 
 When random numbers are needed in a scientific computing application, we generally use deterministic processes which mimic the behavior of random processes. These are called **pseudo-random number generators** (PRNG). A PRNG takes an initial value, called the **seed**, and uses it to produce a sequence of numbers which are supposed to "look random". The seed determines the sequence, so you can make the random number generation in a program reproducible by providing an explicit seed. If no seed is provided, a different one will be used each time the program runs.
@@ -968,7 +1023,7 @@ A sequence of numbers $X\_0, X\_1,\dots $ is periodic with period $p &gt; 0$ if 
 ---
 > id: solution-15
 
-*Solution*. The LCG is full-cycle only if $a \in \\{2, 3\\}.$ The period is $1$ when $a \in \\{0, 1\\}$ and it is $2$ if $a = 4.$
+*Solution.* The LCG is full-cycle only if $a \in \\{2, 3\\}.$ The period is $1$ when $a \in \\{0, 1\\}$ and it is $2$ if $a = 4.$
 
 [Continue](btn:next)
 
@@ -1013,7 +1068,7 @@ Repeat these tests on the sequence whose $k$ th term is the $k$ th digit in the 
 ---
 > id: solution-16
 
-*Solution*. Only 10 of the 50 pairs have the even-indexed term larger than the odd-indexed term:
+*Solution.* Only 10 of the 50 pairs have the even-indexed term larger than the odd-indexed term:
 
     pre(julia-executable)
       | using StatsBase
@@ -1039,7 +1094,7 @@ As a simple example of a PRNG that is not cryptographically secure, consider the
 
 ---
 
-> id: automatic differentiation
+> id: automatic-differentiation
 ## Automatic Differentiation
 
 Suppose that $f: \mathbb{R} \to \mathbb{R}$ is a function whose definition is too complicated for us to feasibly differentiate symbolically. Perhaps the most straightforward way to approximate the derivative of $f$ is to calculate the difference quotient
@@ -1062,14 +1117,14 @@ Use difference quotients to approximate the derivative of $f(x) = x^2$ at $x = \
 :::
 
     pre(julia-executable)
-      | 
+      |
 
     x-quill
 
 ---
 > id: solution-17
 
-*Solution*. The block
+*Solution.* The block
 
     pre(julia-executable)
       | diffquotient(f,x,ϵ) = (f(x+ϵ) - f(x))/ϵ
@@ -1091,14 +1146,14 @@ On the other hand, the problem of calculating the derivative of $f$ is well-cond
 
 Another straightforward alternative to difference quotients is to calculate the derivative symbolically, the way introductory calculus students learn to do it. For example, the derivative of $x^2$ is $2x$. However, this approach quickly becomes untenable as the functions get sufficiently complicated, as is typically the case in modern machine learning applications.
 
-Indeed, there is an approach to derivative computation which is precise, fast, and scalable: **automatic differentiation**. The idea is to replace Float64's with objects called **dual numbers** which track values and gradients at the same time. 
+Indeed, there is an approach to derivative computation which is precise, fast, and scalable: **automatic differentiation**. The idea is to replace Float64's with objects called **dual numbers** which track values and gradients at the same time.
 
 [Continue](btn:next)
 
 ---
 > id: step-dual-numbers-as-matrices
 
-One concrete way to realize dual numbers is to use the matrix 
+One concrete way to realize dual numbers is to use the matrix
 
 ``` latex
 \begin{bmatrix} x & 1 \\ 0 & x \end{bmatrix}
@@ -1135,7 +1190,7 @@ for any polynomial $f$.
 ---
 > id: solution-18
 
-*Solution*.  
+*Solution.*  
 * If $f$ is the identity function, then both sides of the above equation reduce to $\begin{bmatrix} x & 1 \\\ 0 & x \end{bmatrix}$. If $f$ returns the multiplicative identity, then both sides reduce to the identity matrix.
 * We have
 
@@ -1156,13 +1211,13 @@ which in turn is equal to $\begin{bmatrix} f(x)g(x) & (f(x)g(x))' \\\ 0 & f(x)g(
 > id: step-analytic-functions
 
 While the exercise above only addresses polynomial functions $f$, the relationship $f\left(\begin{bmatrix} x & 1 \\\ 0 & x \end{bmatrix}\right) =
-\begin{bmatrix} f(x) & f'(x) \\\ 0 & f(x) \end{bmatrix}$ actually holds for many more functions, because many common functions may be described as limits of polynomials: if $A$ is a matrix, then 
+\begin{bmatrix} f(x) & f'(x) \\\ 0 & f(x) \end{bmatrix}$ actually holds for many more functions, because many common functions may be described as limits of polynomials: if $A$ is a matrix, then
 
 ``` latex
-\operatorname{e}^A = 1 + A + \frac{1}{2}A^2 + \frac{1}{6}A^3 + \cdots 
+\operatorname{e}^A = 1 + A + \frac{1}{2}A^2 + \frac{1}{6}A^3 + \cdots
 ```
 
-Since the identity $f\left(\begin{bmatrix} x & 1 \\\ 0 & x \end{bmatrix}\right) = \begin{bmatrix} f(x) & f'(x) \\\ 0 & f(x) \end{bmatrix}$ is true for every truncation of the sum on the right-hand side, it's true for the exponential function as well. 
+Since the identity $f\left(\begin{bmatrix} x & 1 \\\ 0 & x \end{bmatrix}\right) = \begin{bmatrix} f(x) & f'(x) \\\ 0 & f(x) \end{bmatrix}$ is true for every truncation of the sum on the right-hand side, it's true for the exponential function as well.
 
 [Continue](btn:next)
 
@@ -1188,14 +1243,14 @@ df(t) = (-t^5 + 2*t^4 + 9*t^3 - 15*t^2 - 3*t + 6) * exp(-t^2/4)/2
 :::
 
     pre(julia-executable)
-      | 
+      |
 
     x-quill
 
 ---
 > id: solution-19
 
-*Solution*. We define $f$ as suggested and then calculate `{jl} f([2 1; 0 2])[1,2]`. The result is *exactly the same* as `{jl} df(2)` and $7.46 \times 10^{-17}$ different from `{jl} df(big(2))`. So we see that automatic differentiation gives a major improvement over the difference quotient approach in this instance.
+*Solution.* We define $f$ as suggested and then calculate `{jl} f([2 1; 0 2])[1,2]`. The result is *exactly the same* as `{jl} df(2)` and $7.46 \times 10^{-17}$ different from `{jl} df(big(2))`. So we see that automatic differentiation gives a major improvement over the difference quotient approach in this instance.
 
 In practice, you will usually want to use a library to perform automatic differentiation, because ensuring suitable dual-number-awareness of all of the functions called by $f$ can be a daunting task. Julia has several packages for this purpose, including `{jl} ForwardDiff`. In Python you can use `{py} autograd`, which works for all of the NumPy functions. (We note that these libraries don't actually use $2 \times 2$ matrices to represent dual numbers; they introduce a custom type which has the same behavior.)
 
@@ -1234,7 +1289,7 @@ Gradient descent is fundamentally local: it is not guaranteed to find the global
 
 ::: .exercise
 **Exercise**  
-Consider the function $f(x) = (x^4 - 2x^3 - x^2 + 3x -1)e^{-x^2/4}$. Implement the gradient descent algorithm for finding the minimum of this function.
+Consider the function $f(x) = (x^4 - 2x^3 - x^2 + 3x -1)e^{-x^2/4}$. Implement the gradient descent algorithm for finding the minimum of this function. To take derivatives, you can define a derivative function like `{jl} df(x) = ForwardDiff.derivative(f,x)`.
 
     img(src="images/polynomial-minimize.svg" alt="figure" width="400px" style="float: right;")
 
@@ -1243,27 +1298,28 @@ Consider the function $f(x) = (x^4 - 2x^3 - x^2 + 3x -1)e^{-x^2/4}$. Implement t
 :::
 
     pre(julia-executable)
-      | 
+      | using ForwardDiff
+      |
 
     x-quill
 
 ---
 > id: solution-20
 
-*Solution*. The following is an implementation of gradient descent:
+*Solution.* The following is an implementation of gradient descent:
 
     pre(julia-executable)
-      | using LinearAlgebra
+      | using LinearAlgebra, ForwardDiff
       |
       | function graddescent(f,x₀,ϵ,threshold)
-      |     df(x) = f([x 1; 0 x])[1,2] # auto diff
+      |     df(x) = ForwardDiff.derivative(f,x)
       |     x = x₀
       |     while abs(df(x)) > threshold
       |         x = x - ϵ*df(x)
       |     end
       |     x
       | end
-      | f(t) = exp(-t^2/4) * (t^4 - 2t^3 - t^2 + 3t - I)
+      | f(t) = exp(-t^2/4) * (t^4 - 2t^3 - t^2 + 3t - 1)
 
 Trying various values of $x\_0$, and looking at the graph, we conjecture that the global minimum is reached when the starting value $x\_0$ is between the first two points where $f$ has a local maximum (approximately $-2.83$ and $0.145$). Between $0.145$ and the next local maximum (approximately $2.94$), the algorithm leads us to the local minimum around $x = 1.45$. Outside the interval from the first local maximum the last, the sequence of iterates appears to head off to $-\infty$ or $+\infty$.
 
@@ -1276,16 +1332,16 @@ Skipping over the global minimum to the local one requires choosing $\epsilon$ l
 
 #### Advanced Gradient Descent Algorithms
 
-There are many gradient-descent-based optimization algorithms that improve on plain gradient descent in various ways. In this section, we'll discuss a few of them at a high level, so that you can have a sense of what's going on when you select an appropriate method when making calls to optimization library functions. 
+There are many gradient-descent-based optimization algorithms that improve on plain gradient descent in various ways. In this section, we'll discuss a few of them at a high level, so that you can have a sense of what's going on when you select an appropriate method when making calls to optimization library functions.
 
 [Continue](btn:next)
 
 ---
 > id: step-newton-methods
 
-One issue with gradient descent is that near a local minimum where the graph of the objective function is valley-like (having steep curvature in some directions and shallow curvature in others), gradient descent moves the iterates quickly to the valley but then slowly to the minimum from there. This can be mitigated by accounting for information about the objective function's *second* derivative; such methods are called **Newton** methods. Also popular are *quasi-Newton* methods, which avoid the expensive computation of the second derivative of the objective function while still making use of that information by approximating it using the gradients that have to be evaluated anyway. BFGS (Broyden- Fletcher-Goldfarb-Shanno) and L-BFGS (a low-memory variant of BFGS) are common quasi-Newton methods. 
+One issue with gradient descent is that near a local minimum where the graph of the objective function is valley-like (having steep curvature in some directions and shallow curvature in others), gradient descent moves the iterates quickly to the valley but then slowly to the minimum from there. This can be mitigated by accounting for information about the objective function's *second* derivative; such methods are called **Newton** methods. Also popular are *quasi-Newton* methods, which avoid the expensive computation of the second derivative of the objective function while still making use of that information by approximating it using the gradients that have to be evaluated anyway. BFGS (Broyden- Fletcher-Goldfarb-Shanno) and L-BFGS (a low-memory variant of BFGS) are common quasi-Newton methods.
 
-Common optimizers in deep learning include **Nesterov accelerated gradient**, which uses the idea of *momentum*: each step is taken based on a weighted average of the gradients at the current and preceding iterates. **RMSProp** directly addresses the valley problem by boosting the step size in coordinates with respect to which the partial derivative is small (and tempering the step size in coordinates with large derivative). **Adam** combines RMSProp with momentum. 
+Common optimizers in deep learning include **Nesterov accelerated gradient**, which uses the idea of *momentum*: each step is taken based on a weighted average of the gradients at the current and preceding iterates. **RMSProp** directly addresses the valley problem by boosting the step size in coordinates with respect to which the partial derivative is small (and tempering the step size in coordinates with large derivative). **Adam** combines RMSProp with momentum.
 
 ::: .exercise
 **Exercise**  
@@ -1297,7 +1353,7 @@ Common optimizers in deep learning include **Nesterov accelerated gradient**, wh
 f(x,y) = (x-1)^2 + 100(y-x^2)^2
 ```
 
-(b) Use the code cell below to find how many iterations the GradientDescent algorithm runs for on the Rosenbrock function, starting from the origin. 
+(b) Use the code cell below to find how many iterations the GradientDescent algorithm runs for on the Rosenbrock function, starting from the origin.
 
 (c) Change `{jl} GradientDescent` to `{jl} BFGS`. Did it use fewer iterations? Was it more accurate?
 :::
@@ -1306,15 +1362,15 @@ f(x,y) = (x-1)^2 + 100(y-x^2)^2
       | using Optim
       | rosenbrock(x) =  (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
       | optimize(rosenbrock, zeros(2), GradientDescent())
-      
+
     x-quill
-    
+
 [Continue](btn:next)
 
 ---
 > id: step-optim-solution
 
-*Solution*. Based on the report printed when the `{jl} optimize` function runs, `{jl} GradientDescent` fails, taking the maximum-allowed 1000 iterations and getting only somewhat close to the minimum. BFGS converges in 16 iterations with only 53 function and 53 gradient calls, and it gets the answer exactly right. 
+*Solution.* Based on the report printed when the `{jl} optimize` function runs, `{jl} GradientDescent` fails, taking the maximum-allowed 1000 iterations and getting only somewhat close to the minimum. BFGS converges in 16 iterations with only 53 function and 53 gradient calls, and it gets the answer exactly right.
 
 [Continue](btn:next)
 
@@ -1351,11 +1407,11 @@ Convex optimization problems play an important role in applied math and data sci
 Use the Julia package `{jl} JuMP` with the `{jl} Ipopt` solver to find the minimum of the function $f(x,y) = x^2 + 2y^2$ on the half-plane $x + y \geq 1$.
 :::
 
-*Solution*. The JuMP model involves instantiating a `{jl} Model` object and then (1) creating variables, (2) adding constraints, (3) adding an objective function, (4) solving the problem, and (5) retrieving the values from the variable objects.
+*Solution.* The JuMP model involves instantiating a `{jl} Model` object and then (1) creating variables, (2) adding constraints, (3) adding an objective function, (4) solving the problem, and (5) retrieving the values from the variable objects.
 
     pre(julia-executable)
       | using JuMP, Ipopt
-      | 
+      |
       | model = Model(with_optimizer(Ipopt.Optimizer, print_level=0))
       | @variable(model,x)
       | @variable(model,y)
@@ -1378,18 +1434,18 @@ Use JuMP to find the line of best fit for the points $(1,2), (2, 5),
 :::
 
     pre(julia-executable)
-      | 
+      |
 
     x-quill
 
 ---
 > id: solution-21
 
-*Solution*. We can follow the same approach, but we don't have to use any constraints: 
+*Solution.* We can follow the same approach, but we don't have to use any constraints:
 
     pre(julia-executable)
       | using JuMP, Ipopt
-      | 
+      |
       | A = [1 2; 2 5; 4 5]
       | model = Model(with_optimizer(Ipopt.Optimizer, print_level=0))
       | @variable(model,m)
@@ -1400,10 +1456,10 @@ Use JuMP to find the line of best fit for the points $(1,2), (2, 5),
 
 ---
 
-> id: parallel computing
+> id: parallel-computing
 ## Parallel Computing
 
-Parallel computing involves decomposing a computational task into subtasks which may be performed concurrently. 
+Parallel computing involves decomposing a computational task into subtasks which may be performed concurrently.
 
 ::: .example
 **Example**  
